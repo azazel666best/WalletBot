@@ -2,7 +2,7 @@ from re import fullmatch
 
 
 class Transaction:
-    def __init__(self, income_or_expense, sum_of_money, category, date, description=''):
+    def __init__(self, income_or_expense=True, sum_of_money='', category='', date='', description=''):
         self.income_or_expense = income_or_expense
         self.sum_of_money = sum_of_money
         self.category = category
