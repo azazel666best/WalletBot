@@ -3,7 +3,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from wallet import Wallet
+from db_work import DBWork
+from ceker import money_chek, date_check
 
 
 class FSMTest(StatesGroup):
@@ -54,15 +55,9 @@ class Communication:
         self.dp.register_message_handler(self.final, state="*", commands='Ok')
         self.dp.register_message_handler(self.stop, state="*", commands='stop')
 
-    # async def start(self, message: types.Message):
-    #     markup = self.create_rkm('/stop')
-    #     await FSMTest.first()
-
     async def name(self, message: types.Message, state=FSMTest):
         markup = self.create_rkm('/stop')
         try:
-            obj = Wallet()
-            obj.name = message.text
             async with state.proxy() as data:
                 data['name'] = message.text
             await message.answer('enter description', reply_markup=markup)
@@ -73,8 +68,6 @@ class Communication:
     async def description(self, message: types.Message, state=FSMTest):
         markup = self.create_rkm('/stop')
         try:
-            obj = Wallet()
-            obj.description = message.text
             async with state.proxy() as data:
                 data['description'] = message.text
 
@@ -87,7 +80,10 @@ class Communication:
 
     async def final(self, message: types.Message, state=FSMTest):
         async with state.proxy() as data:
-            await message.answer(f'Wallet {data["name"]}, {data["description"]}\nadded to database',
+            db = DBWork(f'{message.from_user.id}')
+            db.insert('wallet', (data["name"], data["description"]))
+            res = db.select('wallet')
+            await message.answer(f'{res}\nadded to database',
                                  reply_markup=self.create_rkm('/menu'))
         await state.finish()
 
